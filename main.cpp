@@ -1,5 +1,8 @@
 #include "common.h"
 
+// cmake -A Win32 -B build -S . -DCMAKE_TOOLCHAIN_FILE=C:\Packages\scripts\buildsystems\vcpkg.cmake
+// && cmake --build .\build\ --config Release
+
 // mkdir build && cd build && cmake -A Win32 .. && cmake --build . --config Release
 
 // cmake -G "Visual Studio 16 2019" -A Win32 -S \path_to_source\ -B "build32"
