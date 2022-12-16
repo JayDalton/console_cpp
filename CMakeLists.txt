@@ -46,10 +46,11 @@ target_link_libraries(${PROJECT_NAME}
     # DCMTK::ijg8 
     DCMTK::DCMTK
     ${OpenCV_LIBS}
-    # opencv_ml 
-    # opencv_dnn 
     # opencv_core 
-    # opencv_flann
+    # opencv_highgui 
+    # opencv_imgproc 
+    # opencv_imgcodecs 
+    # opencv_videoio 
 )
 
 target_sources(${PROJECT_NAME} PRIVATE
