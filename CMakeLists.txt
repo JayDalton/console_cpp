@@ -36,7 +36,7 @@ add_custom_command(
   COMMENT "copying dcm-file"
   COMMAND ${CMAKE_COMMAND} -E copy
      ${CMAKE_SOURCE_DIR}/assets/PE_Image.dcm
-     ${CMAKE_BINARY_DIR}/${CONFIG}/PE_Image.dcm)
+     ${CMAKE_SOURCE_DIR}/PE_Image.dcm)
 
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
@@ -56,6 +56,8 @@ target_link_libraries(${PROJECT_NAME}
 target_sources(${PROJECT_NAME} PRIVATE
   "c_ressource.h"
   "common.h"
+  "dicom.h"
   "main.cpp"
+  "matrix.h"
 )
 
