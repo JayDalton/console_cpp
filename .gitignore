@@ -34,6 +34,7 @@
 # Content files
 *.jpg
 *.dcm
+*.png
 
 # Build Folder
 .vscode/

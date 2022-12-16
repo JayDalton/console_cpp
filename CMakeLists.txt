@@ -33,10 +33,16 @@ endif()
 
 add_custom_command(
   TARGET ${PROJECT_NAME} POST_BUILD
-  COMMENT "copying dcm-file"
-  COMMAND ${CMAKE_COMMAND} -E copy
-     ${CMAKE_SOURCE_DIR}/assets/PE_Image.jpg
-     ${CMAKE_SOURCE_DIR}/PE_Image.jpg)
+   COMMAND ${CMAKE_COMMAND} -E copy_directory
+      ${CMAKE_SOURCE_DIR}/assets 
+      ${CMAKE_SOURCE_DIR})
+
+# add_custom_command(
+#   TARGET ${PROJECT_NAME} POST_BUILD
+#   COMMENT "copying dcm-file"
+#   COMMAND ${CMAKE_COMMAND} -E copy
+#      ${CMAKE_SOURCE_DIR}/assets/PE_Image.jpg
+#      ${CMAKE_SOURCE_DIR}/PE_Image.jpg)
 
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
