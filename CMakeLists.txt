@@ -31,6 +31,13 @@ if( OpenCV_FOUND )
   # target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 endif()
 
+add_custom_command(
+  TARGET ${PROJECT_NAME} POST_BUILD
+  COMMENT "copying dcm-file"
+  COMMAND ${CMAKE_COMMAND} -E copy
+     ${CMAKE_SOURCE_DIR}/assets/PE_Image.dcm
+     ${CMAKE_BINARY_DIR}/${CONFIG}/PE_Image.dcm)
+
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
     asio::asio

@@ -1,7 +1,10 @@
 #include "common.h"
 
-// cmake -A Win32 -B build -S . -DCMAKE_TOOLCHAIN_FILE=C:\Packages\scripts\buildsystems\vcpkg.cmake
-// && cmake --build .\build\ --config Release
+/*
+cmake -A Win32 -B build -S . -DCMAKE_BUILD_TYPE=DEBUG -DCMAKE_TOOLCHAIN_FILE=C:\Packages\scripts\buildsystems\vcpkg.cmake
+&& cmake --build .\build\ --config Release
+&& cmake --build .\build\
+*/
 
 // mkdir build && cd build && cmake -A Win32 .. && cmake --build . --config Release
 
@@ -25,13 +28,13 @@ auto main(int argc, char const * const argv[]) -> int
 {
    const cv::String keys = 
       "{help h usage ? |      | print this message   }"
-      "{@image1        |      | image1 for compare   }"
+      // "{@image1        |      | image1 for compare   }"
       "{@image2        |<none>| image2 for compare   }"
-      "{@repeat        |1     | number               }"
-      "{path           |.     | path to file         }"
-      "{fps            | -1.0 | fps for output video }"
-      "{N count        |100   | count of objects     }"
-      "{ts timestamp   |      | use time stamp       }"
+      // "{@repeat        |1     | number               }"
+      // "{path           |.     | path to file         }"
+      // "{fps            | -1.0 | fps for output video }"
+      // "{N count        |100   | count of objects     }"
+      // "{ts timestamp   |      | use time stamp       }"
    ;
 
    cv::CommandLineParser parser(argc, argv, keys);
@@ -43,13 +46,13 @@ auto main(int argc, char const * const argv[]) -> int
       return 0;
    }
 
-   int N = parser.get<int>("N");
-   double fps = parser.get<double>("fps");
-   String path = parser.get<String>("path");
-   auto use_time_stamp = parser.has("timestamp");
+   // int N = parser.get<int>("N");
+   // double fps = parser.get<double>("fps");
+   // String path = parser.get<String>("path");
+   // auto use_time_stamp = parser.has("timestamp");
    String img1 = parser.get<String>(0);
-   String img2 = parser.get<String>(1);
-   int repeat = parser.get<int>(2);
+   // String img2 = parser.get<String>(1);
+   // int repeat = parser.get<int>(2);
 
    if (!parser.check())
    {
