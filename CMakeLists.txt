@@ -5,17 +5,15 @@ project(console_cpp VERSION 0.1)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-if (MSVC)
-  message("MSVC found")
+if( MSVC )
+  message("MSVC found") # needed by dcmtk
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++20 /Zc:__cplusplus")
 endif()
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-# add_compile_options(/std:c++latest /Zc:__cplusplus)
-# target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 # Set OpenCVConfig.cmake Search Directory
-set(OpenCV_DIR )
+set( OpenCV_DIR )
 if (NOT CMAKE_CL_64 )
   set( OpenCV_DIR "C:/Packages/installed/x86-windows/share/opencv" )
 else()  
@@ -23,18 +21,13 @@ else()
 endif()  
 
 find_package(asio CONFIG REQUIRED)
-find_package(DCMTK CONFIG REQUIRED NO_MODULE)
+find_package(DCMTK CONFIG REQUIRED)
 find_package(OpenCV CONFIG REQUIRED)
 
 if( OpenCV_FOUND )
   message("OpenCV found")
-  # Additional Include Directories
   include_directories(${OpenCV_INCLUDE_DIRS})
-
-  # Additional Library Directories
   link_directories(${OpenCV_LIB_DIR})
-
-  # Additional Dependencies
   # target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 endif()
 
