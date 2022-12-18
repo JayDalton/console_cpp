@@ -2,11 +2,12 @@ cmake_minimum_required(VERSION 3.24)
 
 project(console_cpp VERSION 0.1) 
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
+add_compile_options(/std:c++latest /Zc:__cplusplus)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 # Set OpenCVConfig.cmake Search Directory
 set(OpenCV_DIR )
@@ -16,11 +17,12 @@ else()
   set( OpenCV_DIR "C:/Packages/installed/x64-windows/share/opencv" )
 endif()  
 
-find_package(asio REQUIRED)
-find_package(DCMTK REQUIRED)
-find_package(OpenCV REQUIRED)
+find_package(asio CONFIG REQUIRED)
+find_package(DCMTK CONFIG REQUIRED NO_MODULE)
+find_package(OpenCV CONFIG REQUIRED)
 
 if( OpenCV_FOUND )
+  message("OpenCV found")
   # Additional Include Directories
   include_directories(${OpenCV_INCLUDE_DIRS})
 
@@ -28,6 +30,13 @@ if( OpenCV_FOUND )
   link_directories(${OpenCV_LIB_DIR})
 
   # Additional Dependencies
+  # target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+endif()
+
+if( DCMTK_FOUND )
+  message("DCMTK found")
+  include_directories(${DCMTK_INCLUDE_DIRS})
+  link_directories(${DCMTK_LIBRARIES})
   # target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 endif()
 

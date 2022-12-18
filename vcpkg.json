@@ -6,7 +6,9 @@
       "asio",
       {
          "name": "dcmtk",
-         "default-features": false
+         "default-features": false,
+         "platform": "windows",
+         "host": true
       },
       {
          "name": "opencv",
