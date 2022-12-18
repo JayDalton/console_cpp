@@ -2,13 +2,13 @@
    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
    "name": "console",
    "version-string": "0.1.0",
+   "supports": "windows",
    "dependencies": [
       "asio",
       {
          "name": "dcmtk",
-         "default-features": false,
-         "platform": "windows",
-         "host": true
+         "default-features": true,
+         "platform": "windows & x86"
       },
       {
          "name": "opencv",

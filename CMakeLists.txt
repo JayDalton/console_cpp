@@ -5,9 +5,14 @@ project(console_cpp VERSION 0.1)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+if (MSVC)
+  message("MSVC found")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++20 /Zc:__cplusplus")
+endif()
+
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-add_compile_options(/std:c++latest /Zc:__cplusplus)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+# add_compile_options(/std:c++latest /Zc:__cplusplus)
+# target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 # Set OpenCVConfig.cmake Search Directory
 set(OpenCV_DIR )
