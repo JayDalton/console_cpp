@@ -2,12 +2,12 @@ cmake_minimum_required(VERSION 3.24)
 
 project(console_cpp VERSION 0.1) 
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 if( MSVC )
   message("MSVC found") # needed by dcmtk
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++20 /Zc:__cplusplus")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest /Zc:__cplusplus")
 endif()
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
@@ -69,6 +69,7 @@ target_link_libraries(${PROJECT_NAME}
 target_sources(${PROJECT_NAME} PRIVATE
   "c_ressource.h"
   "common.h"
+  "console.h"
   "dicom.h"
   "main.cpp"
   "matrix.h"
