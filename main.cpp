@@ -1,5 +1,7 @@
 #include "common.h"
 
+#include "console.h"
+
 // #include "windows.h"
 // #include "dicom.h"
 // #include "matrix.h"
@@ -67,12 +69,15 @@ auto main(int argc, char const * const argv[]) -> int
       return 1;
    }
 
+   Console console;
+   return console.run(source);
+
    // find all dcm files
    // use console
    print("directory_iterator:\n");
    using namespace std::ranges::views;
 
-   auto res = fs::directory_iterator{source}
+   auto files = fs::directory_iterator{source}
       | filter([](auto&& entry){ return entry.exists(); })
       | filter([](auto&& entry){ return entry.is_regular_file(); })
       | filter([](auto&& entry){ return 0 < entry.file_size(); })
@@ -80,10 +85,10 @@ auto main(int argc, char const * const argv[]) -> int
       | filter([](auto&& path){ return path.extension() == ".dcm";})
    ;
 
-   for (const fs::path& path : res)
+   for (const fs::path& path : files)
    {
       // print("{} {} \n", path.filename(), path.extension());
-      print("{} \n", path.filename().string());
+      print("{} \n", path.string());
    }
 
 

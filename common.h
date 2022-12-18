@@ -52,6 +52,9 @@ namespace fs = std::filesystem;
 namespace rgs = std::ranges;
 namespace vws = std::views;
 
+using PathList = std::vector<fs::path>;
+
+
 namespace StringCharLiterals 
 {
    // https://learn.microsoft.com/en-us/cpp/cpp/string-and-character-literals-cpp
