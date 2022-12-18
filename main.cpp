@@ -25,19 +25,6 @@ cmake -A Win32 -B build -S . -DCMAKE_TOOLCHAIN_FILE=C:\Packages\scripts\buildsys
 
 auto main(int argc, char const * const argv[]) -> int
 {
-   print("... {} ...\n", __cplusplus);
-
-   auto const ints = {0,1,2,3,4,5};
-   auto even = [](int i) { return 0 == i % 2; };
-   auto square = [](int i) { return i * i; };
-
-    // "pipe" syntax of composing the views:
-    for (int i : ints | std::views::filter(even) | std::views::transform(square)) {
-        std::cout << i << ' ';
-    }
-
-    std::cout << '\n';
-
    const cv::String keys = 
       "{help h usage ? |      | print this message   }"
       "{@source        |<none>| source for process   }"
@@ -62,24 +49,45 @@ auto main(int argc, char const * const argv[]) -> int
       return 0;
    }
 
-   String sourceFile = parser.get<String>(0);
-   String targetFile = parser.get<String>(1);
+   String source = parser.get<String>(0);
+   String target = parser.get<String>(1);
    // int repeat = parser.get<int>(2);
    // double fps = parser.get<double>("fps");
    // int N = parser.get<int>("N");
 
-   if (!fs::exists(sourceFile))
+   if (!fs::exists(source))
    {
-      print("file does not exists: {}", sourceFile);
+      print("source does not exists: {}", source);
       return 1;
    }
    
-   print("Source File is: {}\n", sourceFile);
+   if (!fs::is_directory(fs::status(source)))
+   {
+      print("source is no directory: {}", source);
+      return 1;
+   }
 
-   // DcmFileFormat format;
-   // DcmDataset dataset;
+   // find all dcm files
+   // use console
+   print("directory_iterator:\n");
+   using namespace std::ranges::views;
 
-   if (fs::path(sourceFile).extension() == ".dcm")
+   auto res = fs::directory_iterator{source}
+      | filter([](auto&& entry){ return entry.exists(); })
+      | filter([](auto&& entry){ return entry.is_regular_file(); })
+      | filter([](auto&& entry){ return 0 < entry.file_size(); })
+      | transform([](auto&& entry){ return entry.path(); })
+      | filter([](auto&& path){ return path.extension() == ".dcm";})
+   ;
+
+   for (const fs::path& path : res)
+   {
+      // print("{} {} \n", path.filename(), path.extension());
+      print("{} \n", path.filename().string());
+   }
+
+
+   if (fs::path(source).extension() == ".dcm")
    {
       print("DCM file detected\n");
 
@@ -88,7 +96,7 @@ auto main(int argc, char const * const argv[]) -> int
       {
          OFCondition status;
          DcmMetaInfo metainfo;
-         status = metainfo.loadFile(sourceFile.c_str());
+         status = metainfo.loadFile(source.c_str());
          if (status.good())
          {
             OFString sopClassUID, xferUID;
@@ -108,7 +116,7 @@ auto main(int argc, char const * const argv[]) -> int
          OFCondition result = EC_Normal;
          /* Load file and get pixel data element */
          DcmFileFormat dfile;
-         result = dfile.loadFile(sourceFile.c_str());
+         result = dfile.loadFile(source.c_str());
          if (result.bad())
          {
             print("load file\n");
@@ -173,7 +181,7 @@ auto main(int argc, char const * const argv[]) -> int
       print("----------------- 2\n");
 
       {
-         DicomImage image(sourceFile.c_str());
+         DicomImage image(source.c_str());
 
          auto frameCount = image.getFrameCount();
          auto firstFrame = image.getFirstFrame();
@@ -234,24 +242,6 @@ auto main(int argc, char const * const argv[]) -> int
          int k = cv::waitKey(0); // Wait for a keystroke in the window
       }
    }
-
-   cv::Mat img = cv::imread(sourceFile, cv::IMREAD_COLOR);
-
-   if (img.empty())
-   {
-      print("Could not read the image: {}", sourceFile);
-      return 1;
-   }
-
-   print("...\n");
-
-   cv::imshow("Display window", img);
-
-   int k = cv::waitKey(0); // Wait for a keystroke in the window
-   // if (k == 's')
-   // {
-   //     cv::imwrite("starry_night.png", img);
-   // }
 
    return {};
 }
