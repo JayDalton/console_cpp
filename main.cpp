@@ -69,7 +69,7 @@ auto main(int argc, char const * const argv[]) -> int
       return 1;
    }
 
-   Console console;
+   cmd::Console console;
    return console.run(source);
 
    // find all dcm files
