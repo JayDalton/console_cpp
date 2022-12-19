@@ -8,16 +8,17 @@ struct Console
    {
       print("Contemporary C++ in Action\n");
 
-      for (auto&& path : get_file_list(folder))
-      {
-         print("{} \n", path.filename().string());
-
-      }
-
       show_menu();
+      show_list(folder);
 
       while (auto input = readInput())
       {
+         // auto [x,y] = m_engine.find(input.value());
+         // if () 
+         // {
+
+         // }
+
          for (auto c : (*input))
          {
             // print("int: {0:d};  hex: {0:#x};  oct: {0:#o};  bin: {0:#b}\n", c);
@@ -38,6 +39,14 @@ private:
          "info - info of indexed dcm file \n"
          "show - show indexed dcm file \n"
       );
+   }
+
+   auto show_list(std::string_view folder) -> void
+   {
+      auto res = get_file_list(folder) 
+         | std::views::transform([](auto&& path){ return path.filename().string(); });
+
+      std::ranges::copy(res, std::ostream_iterator<String>(std::cout, "\n"));
    }
 
    auto get_file_list(std::string_view folder) -> PathList
