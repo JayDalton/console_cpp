@@ -108,6 +108,26 @@ namespace dcm {
    //          print("result bad\n");
    //    }
 
+   auto get_file_list(std::string_view source) -> PathList
+   {
+      using namespace std::ranges::views;
+
+      if (!fs::exists(source) || !fs::is_directory(fs::status(source)))
+      {
+         print("source is no directory: {}\n", source);
+         return {};
+      }
+
+      return fs::directory_iterator{source}
+         | filter([](auto&& entry){ return entry.exists(); })
+         | filter([](auto&& entry){ return entry.is_regular_file(); })
+         | filter([](auto&& entry){ return 0 < entry.file_size(); })
+         | transform([](auto&& entry){ return entry.path(); })
+         | filter([](auto&& path){ return path.extension() == ".dcm";})
+         | std::ranges::to<PathList>()
+      ;
+   }
+
    struct FileInfo 
    {
       double FrameTime{0};
@@ -123,7 +143,7 @@ namespace dcm {
 
    auto read_file_info(const fs::path& path) -> FileInfo 
    {
-      auto source = path.filename().string();
+      auto source = path.string();
       DicomImage image(source.c_str());
 
       if (image.getStatus() != EI_Status::EIS_Normal)
@@ -152,16 +172,16 @@ namespace dcm {
 
    auto format_file_info(const FileInfo& info) -> String 
    {
-      return std::format("{}: {}x{} | {}-{} | {}_{}_{}_{}"
+      return std::format("{:20} | {}x{} | {:3} {:5} {:9} | {}: {} {}"
          , info.Path.filename().string()
          , info.Height
          , info.Width
+         , info.isMonochrome ? "mono" : "color"
          , info.Depth
-         , info.isMonochrome
+         , info.DataSize
          , info.FrameCount
          , info.FirstFrame
          , info.FrameTime
-         , info.DataSize
       );
    }
 

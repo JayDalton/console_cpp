@@ -12,26 +12,17 @@ namespace cmd {
 
    using ResultList = std::vector<Category>;
 
+   using CmdParam = std::variant<std::monostate, int, float, Category>;
+
+
+
    //////////////////////////////////////////////////////////////////////////////
 
    struct Repository
    {
-      auto isStopword(const String& word) const -> bool
+      auto getIntent(StringView view) const -> std::optional<Category>
       {
-         return m_stopwords.contains(word);
-      }
-
-      auto findRoot(const String& word) const -> String
-      {
-         if (m_rootword.contains(word))
-         {
-            return m_rootword.at(word);
-         }
-         return word;
-      }
-
-      auto getIntent(const String& word) const -> std::optional<Category>
-      {
+         String word{view.begin(), view.end()};
          if (m_meanings.contains(word))
          {
             return m_meanings.at(word);
@@ -40,31 +31,29 @@ namespace cmd {
       }
 
    private:
-      std::unordered_set<String> m_stopwords{{
-         "me", "an", "a", "in"
-      }};
-
-      std::map<String, String> m_rootword{{
-         // {"home", "menu"}, ???
-         {"view", "show"},
-      }};
-
       std::map<String, Category> m_meanings{{
          {"menu", Category::Menu},
+         {"home", Category::Menu},
          {"list", Category::List},
          {"info", Category::Info},
          {"show", Category::Show},
+         {"view", Category::Show},
       }};
    };
+
+   //////////////////////////////////////////////////////////////////////////////
 
    auto normalize(StringView input) -> StringList
    {
       using namespace std::views;
 
+      // list
+      // info 2
+      // show 1
+
       auto words = input 
-         | filter([](unsigned char c) { return std::isalpha(c) || std::isspace(c); })
          | transform([](unsigned char c) { return std::tolower(c); })
-         // | filter/remove consecutive spaces, C++23?
+         // | filter/remove consecutive spaces, C++23?         
          | split(' ')
          | transform([](auto&& c) -> String { return { c.begin(), c.end() }; })
          | filter([](auto&& c) { return !c.empty(); })
@@ -73,29 +62,68 @@ namespace cmd {
       return { words.begin(), words.end() };
    }
 
-   //////////////////////////////////////////////////////////////////////////////
-
    struct Recognizer
    {
-      auto calculate(StringView input) -> ResultList
+      auto to_int(StringView sv) const -> Optional<int>
       {
-         return exctract(normalize(input));
+         int r{};
+         auto [ptr, ec] { std::from_chars(sv.data(), sv.data() + sv.size(), r) };
+         if (ec == std::errc()) { return r; } else { return std::nullopt; }
       }
 
-      auto exctract(const StringList& words) -> ResultList
+      auto to_float(StringView sv) const -> Optional<float>
+      {
+         float r{};
+         auto [ptr, ec] { std::from_chars(sv.data(), sv.data() + sv.size(), r) };
+         if (ec == std::errc()) { return r; } else { return std::nullopt; }
+      }
+
+      auto to_value(StringView input) const -> CmdParam
+      {
+         if (auto value = to_float(input))
+         {
+            return value.value();
+         }
+         else if (auto value = to_int(input))
+         {
+            return value.value();
+         }
+         else if (auto value { m_repo.getIntent(input)})
+         {
+            return value.value();
+         }
+         return {};
+      }
+
+      auto interpret(StringView input) -> StringList
       {
          using namespace std::views;
 
-         auto intent = words
-            | filter([this](const String& word) { return !m_repo.isStopword(word); })
-            | transform([this](const String& word) { return m_repo.findRoot(word); })
-            | transform([this](const String& word) { return m_repo.getIntent(word); })
-            | filter([](auto&& opt){ return opt.has_value(); })
-            | transform([](auto&& opt){ return opt.value(); })
+         auto words = input 
+            | transform([](unsigned char c) { return std::tolower(c); })
+            | split(' ')
+            | transform([](auto&& c) -> String { return { c.begin(), c.end() }; })
+            | filter([](auto&& c) { return !c.empty(); })
+            // | transform([this](String&& str){ return to_value(str); })
          ;
 
-         return { intent.begin(), intent.end() };
+         return { words.begin(), words.end() };
       }
+
+      // auto exctract(const StringList& words) -> ResultList
+      // {
+      //    using namespace std::views;
+
+      //    auto intent = words
+      //       | filter([this](const String& word) { return !m_repo.isStopword(word); })
+      //       | transform([this](const String& word) { return m_repo.findRoot(word); })
+      //       | transform([this](const String& word) { return m_repo.getIntent(word); })
+      //       | filter([](auto&& opt){ return opt.has_value(); })
+      //       | transform([](auto&& opt){ return opt.value(); })
+      //    ;
+
+      //    return { intent.begin(), intent.end() };
+      // }
 
    private:
       Repository m_repo;
@@ -119,31 +147,11 @@ namespace cmd {
       );
    }
 
-   auto get_file_list(std::string_view source) -> PathList
-   {
-      using namespace std::ranges::views;
-
-      if (!fs::exists(source) || !fs::is_directory(fs::status(source)))
-      {
-         print("source is no directory: {}\n", source);
-         return {};
-      }
-
-      return fs::directory_iterator{source}
-         | filter([](auto&& entry){ return entry.exists(); })
-         | filter([](auto&& entry){ return entry.is_regular_file(); })
-         | filter([](auto&& entry){ return 0 < entry.file_size(); })
-         | transform([](auto&& entry){ return entry.path(); })
-         | filter([](auto&& path){ return path.extension() == ".dcm";})
-         | std::ranges::to<PathList>()
-      ;
-   }
-
    auto show_list(std::string_view folder) -> void
    {
-      auto res = get_file_list(folder) 
-         | std::views::transform([](auto&& path){ return dcm::read_file_info(path); })
-         | std::views::transform([](auto&& info){ return dcm::format_file_info(info); })
+      auto res = dcm::get_file_list(folder) 
+         | std::views::transform(dcm::read_file_info)
+         | std::views::transform(dcm::format_file_info)
       ;
 
       std::ranges::copy(res, std::ostream_iterator<String>(std::cout, "\n"));
@@ -167,18 +175,11 @@ namespace cmd {
        }
    }
 
-   auto interpret(StringOpt&& input) -> void
-   {
-      
-   }
-
    struct Console
    {
-      Console() { print("-- ctor\n"); }
-
       int run(std::string_view folder)
       {
-         print("Contemporary C++ in Action\n");
+         print("Dicom Image Info\n");
 
          // show_menu();
          show_list(folder);
