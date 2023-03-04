@@ -7,7 +7,7 @@
       "asio",
       {
          "name": "dcmtk",
-         "default-features": true,
+         "default-features": false,
          "platform": "windows & x86"
       },
       {

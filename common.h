@@ -23,6 +23,14 @@
 #include <variant>
 #include <vector>
 
+#include <cassert>
+#include <charconv>
+#include <iomanip>
+#include <iostream>
+#include <optional>
+#include <string_view>
+#include <system_error>
+
 using String = std::string;
 using StringList = std::vector<String>;
 using StringOpt = std::optional<String>;
@@ -39,6 +47,9 @@ using WStringList = std::vector<WString>;
 using WStringOpt = std::optional<WString>;
 using WStringView = std::wstring_view;
 
+template <typename Type>
+using Optional = std::optional<Type>;
+
 template <typename... Args>
 void print(WStringView format, Args&&... args)
 {
@@ -51,6 +62,9 @@ using namespace std::string_view_literals;
 namespace fs = std::filesystem;
 namespace rgs = std::ranges;
 namespace vws = std::views;
+
+using PathList = std::vector<fs::path>;
+
 
 namespace StringCharLiterals 
 {
